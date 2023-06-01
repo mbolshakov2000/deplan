@@ -32,7 +32,7 @@ public class EventDetailPanel extends JPanel {
     JButton cancel, submit;
     JTable competenceTable;
     JButton competenceAdd, competenceChange, competenceDelete;
-    EventDetailPanel(Event e, ArrayList<CompetenceEvent> competences) {
+    EventDetailPanel(Event e) {
         Font font = Main.font;
         del = new JLabel();
         del.setPreferredSize(new Dimension(900,30));
@@ -159,61 +159,6 @@ public class EventDetailPanel extends JPanel {
         add(costLabel);
         add(costField);
         add(del1);
-
-        competenceAdd = new JButton("Добавить/Изменить");
-//        competenceChange = new JButton("Изменить");
-        competenceDelete = new JButton("Удалить");
-        competenceAdd.setFont(font);
-//        competenceChange.setFont(font);
-        competenceDelete.setFont(font);
-        competenceDelete.setPreferredSize(competenceAdd.getPreferredSize());
-        if (e != null) {
-            compLabel = new JLabel("Развитие компетенций:");
-            compLabel.setFont(font);
-            add(compLabel);
-            add(delc);
-
-            String[][] arrayCompetences = new String[competences.size()][4];
-            for (int i = 0; i < competences.size(); i++) {
-                arrayCompetences[i] = competences.get(i).toArray1();
-            }
-            String[] columnsHeader = new String[]{"Код", "Название",
-                    "Уровень с", "Результат"};
-
-            competenceTable = new JTable(arrayCompetences, columnsHeader);
-            competenceTable.setFont(font);
-            JTableHeader header = competenceTable.getTableHeader();
-            header.setFont(font);
-            TableColumnModel columnModel = competenceTable.getColumnModel();
-            Enumeration<TableColumn> en = columnModel.getColumns();
-            TableColumn column = (TableColumn) en.nextElement();
-            column.setMinWidth(50);
-            column.setMaxWidth(50);
-            column = (TableColumn) en.nextElement();
-            column = (TableColumn) en.nextElement();
-            column.setMinWidth(150);
-            column.setMaxWidth(160);
-            column = (TableColumn) en.nextElement();
-            column.setMinWidth(150);
-            column.setMaxWidth(160);
-
-            scroll1 = new JScrollPane(competenceTable);
-            scroll1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-            scroll1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-            scroll1.setPreferredSize(new Dimension(700, 300));
-            add(scroll1);
-
-            JPanel panel = new JPanel();
-            panel.setPreferredSize(new Dimension(200, 300));
-
-            panel.add(delb);
-            panel.add(competenceAdd);
-//            panel.add(del2);
-//            panel.add(competenceChange);
-            panel.add(del3);
-            panel.add(competenceDelete);
-            add(panel);
-        }
         add(del);
         add(cancel);
         add(submit);

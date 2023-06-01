@@ -15,83 +15,8 @@ import static java.lang.Integer.parseInt;
 class EventDetailFrame extends JFrame {
     EventDetailFrame(Event ev) {
         Main.closingWindowEvent = 0;
-        ArrayList<CompetenceEvent> competences = new ArrayList<>();
-        if (ev != null) {
-            String event_id="";
-            String id ="";
-            String abbreviation = "";
-            String name = "";
-            String level_id="";
-            String level = "";
-            String result_id = "";
-            String result = "";
-            try {
-                DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
-                Connection c = DriverManager.getConnection(Main.URL, Main.USER, Main.PASSWORD);
-                Statement s = c.createStatement();
-                ResultSet rs = s.executeQuery("select dc.event_id, c.competence_id, c.abbreviation, c.name, " +
-                        "dl.level_id, dl.name as \"level\", dc.result as \"result_id\", dl2.name as \"result\" " +
-                        "from developed_competence dc JOIN competence c on c.competence_id = dc.competence_id " +
-                        "JOIN dev_level dl on dl.level_id = dc.level_id " +
-                        "JOIN dev_level dl2 on dl2.level_id = dc.result " +
-                        "where dc.event_id = " + ev.id);
-                while (rs.next()) {
-                    event_id = rs.getString("event_id");
-                    id = rs.getString("competence_id");
-                    abbreviation = rs.getString("abbreviation");
-                    name = rs.getString("name");
-                    level_id = rs.getString("level_id");
-                    level = rs.getString("level");
-                    result_id = rs.getString("result_id");
-                    result = rs.getString("result");
-                    competences.add(new CompetenceEvent(event_id,id,abbreviation, name, level_id,
-                            level, result_id, result));
-                }
-            } catch (SQLException ex) {
-                if (ex.getErrorCode() == 12505) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Не найдена База Данных");
-                    setVisible(false);
-                    dispose();
-                    return;
-                } else if (1017 == ex.getErrorCode()) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Неверное имя пользователя или пароль");
-                    setVisible(false);
-                    dispose();
-                    return;
-                } else if (ex.getErrorCode() == 942) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Нет таблицы developed_competence или dev_level или competence");
-                    setVisible(false);
-                    dispose();
-                    return;
-                } else {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            ex.getSQLState() + '\n' + ex.getErrorCode() + '\n' + ex.getMessage());
-                    setVisible(false);
-                    dispose();
-                    return;
-                }
-            } catch (StringIndexOutOfBoundsException er) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Измените данные БД");
-                setVisible(false);
-                dispose();
-                return;
-            }
-        }
-
-        if (ev == null)
-            setSize(1000, 500);
-        else
-            setSize(1000, 850);
-        EventDetailPanel panel = new EventDetailPanel(ev, competences);
+        setSize(1000, 500);
+        EventDetailPanel panel = new EventDetailPanel(ev);
         add(panel);
         setVisible(true);
         setTitle("Режим редактирования");
@@ -135,7 +60,7 @@ class EventDetailFrame extends JFrame {
                             s.executeQuery("INSERT INTO Event VALUES (" + id+",'"+panel.nameField.getText() +
                                     "','"+panel.typeField.getText()+"','"+panel.descriptionField.getText()+ "', " +
                                     startDate+ ", " + endDate + ", " + panel.quantityField.getText() +
-                                    ", " + panel.costField.getText() +")");
+                                    ", " + panel.costField.getText() +",0)");
 
                         } catch (SQLException errrr) {
                             System.out.println("Ошибка");
@@ -194,40 +119,6 @@ class EventDetailFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 dispose();
-            }
-        });
-
-        panel.competenceAdd.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                EventCompetenceFrame ecframe = new EventCompetenceFrame(ev);
-                ecframe.setLocationRelativeTo(null);
-                ecframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                ecframe.addWindowListener(new java.awt.event.WindowAdapter() {
-                    public void windowClosed(WindowEvent e) {
-                        setVisible(false);
-                        dispose();
-                        EventDetailFrame tframe = new EventDetailFrame(ev);
-                        tframe.setLocationRelativeTo(null);
-                        tframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                        Main.closingWindowEvent = 1;
-                    }
-                });
-            }
-        });
-
-        panel.competenceDelete.addActionListener(new ActionListener() {
-            @SneakyThrows
-            public void actionPerformed(ActionEvent e) {
-                DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
-                Connection c = DriverManager.getConnection(Main.URL, Main.USER, Main.PASSWORD);
-                Statement s = c.createStatement();
-                String selectID = competences.get(panel.competenceTable.getSelectedRow()).id;
-                s.executeQuery("DELETE FROM CURRENT_LEVEL WHERE event_id = "+ ev.id +" AND competence_id = " + selectID);
-                setVisible(false);
-                dispose();
-                EventDetailFrame tframe = new EventDetailFrame(ev);
-                tframe.setLocationRelativeTo(null);
-                tframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             }
         });
     }
