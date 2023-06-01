@@ -168,7 +168,7 @@ class EventsFrame extends JFrame {
                 else {
                     JOptionPane.showMessageDialog(
                             null,
-                            "Выберите сотрудника");
+                            "Выберите мероприятие");
                 }
             }
         });
