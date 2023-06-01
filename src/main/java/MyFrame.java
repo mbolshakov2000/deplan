@@ -1,7 +1,12 @@
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import static java.lang.Integer.parseInt;
 
 class MyFrame extends JFrame {
     MyFrame() {
@@ -30,6 +35,28 @@ class MyFrame extends JFrame {
                         tframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                     }
                 });
+            }
+        });
+
+        panel.analysisButton.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                panel.progressBar.setVisible(true);
+                panel.progressBar.setIndeterminate(true);
+                PredictThread predictThread = new PredictThread();
+                Thread predThread = new Thread(predictThread);
+                predThread.start();
+                Timer v = new Timer(10, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        if (predictThread.getResult()==1){
+                            panel.progressBar.setVisible(false);
+                            ((Timer) e.getSource()).stop();
+                        }
+                    }
+                });
+                v.start();
+                AlgorithmFrame answerFrame = new AlgorithmFrame();
+                answerFrame.setLocationRelativeTo(null);
+                answerFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             }
         });
     }

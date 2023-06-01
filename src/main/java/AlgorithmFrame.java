@@ -231,93 +231,15 @@ class AlgorithmFrame extends JFrame {
             dispose();
             return;
         }
-
-        ArrayList<CurrentLevel> currentLevels = new ArrayList<>();
-        String competence_id="";
-        level_id="";
-        String event_id="";
-        String result_id="";
-        try {
-            DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
-            Connection c = DriverManager.getConnection(Main.URL, Main.USER, Main.PASSWORD);
-            Statement s = c.createStatement();
-            ResultSet rs = s.executeQuery("select cl.competence_id, cl.level_id as \"result_id\", cl.event_id, " +
-                    "max(cl2.level_id) keep (dense_rank first order by cl2.cl_date) as \"level_id\" from current_level cl join " +
-                    "current_level cl2 on cl.employee_id = cl2.employee_id and cl.competence_id = cl2.competence_id and " +
-                    "cl2.cl_date < cl.cl_date where (cl.is_deleted is null or cl.is_deleted = 0) and (cl2.is_deleted is null or cl2.is_deleted = 0) " +
-                    "group by cl.event_id, cl.competence_id, cl.level_id, cl.employee_id, cl.cl_date");
-            while (rs.next()) {
-                competence_id = rs.getString("competence_id");
-                level_id = rs.getString("level_id");
-                event_id = rs.getString("event_id");
-                result_id = rs.getString("result_id");
-                currentLevels.add(new CurrentLevel(competence_id, level_id, event_id, result_id));
-            }
-        } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Ошибка");
-                setVisible(false);
-                dispose();
-                return;
-        }
-        File file = new File("train.csv");
-        try {
-            FileWriter fw = new FileWriter(file);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write("Competence,Event,Level,Dest,Dest1");
-            bw.newLine();
-            for (int i = 0; i < currentLevels.size(); i++) {
-                bw.write(currentLevels.get(i).getCompetence_id() + "," + currentLevels.get(i).getEvent_id() + "," +
-                        currentLevels.get(i).getLevel_id() + "," + currentLevels.get(i).getResult_id() + "," +
-                        (Integer.parseInt(currentLevels.get(i).getResult_id()) > Integer.parseInt(currentLevels.get(i).getLevel_id()) ? 1 : 0));
-                bw.newLine();
-            }
-            bw.close();
-            fw.close();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        String line = "python src/main/resources/predict_result.py";
-        CommandLine cmdLine = CommandLine.parse(line);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-        DefaultExecutor executor = new DefaultExecutor();
-        executor.setStreamHandler(streamHandler);
-        try {
-            int exitCode = executor.execute(cmdLine);
-            System.out.println(outputStream.toString());
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        try {
-            DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
-            Connection c = DriverManager.getConnection(Main.URL, Main.USER, Main.PASSWORD);
-            Statement s = c.createStatement();
-            s.executeQuery("delete from developed_competence purge");
-            BufferedReader reader = new BufferedReader(new FileReader("text.txt"));
-            String newLine = reader.readLine();
-            while (newLine != null) {
-                String[] parts = newLine.split(" ");
-                s.executeQuery("INSERT INTO developed_competence VALUES (" + parts[1] + "," + parts[0] + "," + parts[2] + "," + parts[3] + ")");
-                newLine = reader.readLine();
-            }
-            reader.close();
-        }
-        catch (Exception errrr) {
-            errrr.printStackTrace();
-        }
-
+        
         ArrayList<CompetenceEvent> competencesEvents = new ArrayList<>();
-        event_id="";
+        String event_id="";
         id ="";
         abbreviation = "";
         name = "";
         level_id="";
         level = "";
-        result_id = "";
+        String result_id = "";
         String result = "";
         try {
             DriverManager.registerDriver(new oracle.jdbc.OracleDriver());

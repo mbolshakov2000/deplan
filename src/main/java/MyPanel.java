@@ -4,6 +4,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.Color;
@@ -12,6 +13,8 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.*;
 import java.sql.*;
@@ -20,13 +23,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import static java.lang.Integer.parseInt;
+
 @Builder
 @Data
 @AllArgsConstructor
 public class MyPanel extends JPanel {
     JLabel openLabel, teachersLabel, coursesLabel, competencesLabel, dbLabel, analysisLabel, del1, del2, del3, del4, del5,
-    openButton, teachersButton, coursesButton, competencesButton, dbButton, analysisButton, del6, del7, del8, del9, del10, del11;
+    openButton, teachersButton, coursesButton, competencesButton, dbButton, analysisButton, del6, del7, del8, del9, del10, del11, del12;
     JFileChooser fileChooser;
+    JProgressBar progressBar;
 
     MyPanel() {
         del1 = new JLabel();
@@ -51,6 +57,8 @@ public class MyPanel extends JPanel {
         del10.setPreferredSize(new Dimension(1200,20));
         del11 = new JLabel();
         del11.setPreferredSize(new Dimension(1200,1));
+        del12 = new JLabel();
+        del12.setPreferredSize(new Dimension(1200,1));
         Font font = Main.font;
         openLabel = new JLabel("Открыть конфигурацию");
         openLabel.setFont(new Font("Verdana", Font.PLAIN, 20));
@@ -208,14 +216,12 @@ public class MyPanel extends JPanel {
                 add(analysisButton);
                 add(del11);
                 add(analysisLabel);
+                add(del12);
+                progressBar = new JProgressBar();
+                progressBar.setVisible(false);
+                add(progressBar);
                 analysisButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                analysisButton.addMouseListener(new MouseAdapter() {
-                    public void mouseClicked(MouseEvent e) {
-                        AlgorithmFrame answerFrame = new AlgorithmFrame();
-                        answerFrame.setLocationRelativeTo(null);
-                        answerFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                    }
-                });
+
             } catch (IOException t) {
                 System.out.println(t);
             }
