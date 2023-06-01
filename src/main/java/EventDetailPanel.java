@@ -111,7 +111,7 @@ public class EventDetailPanel extends JPanel {
             name1Label.setText(e.name);
             typeField.setText(e.type);
             descriptionField.setText(e.description);
-            if (!e.date_start.equals("")) {
+            if (e.date_start != null) {
                 int day = Integer.parseInt(e.date_start.substring(8, 10));
                 int month = Integer.parseInt(e.date_start.substring(5, 7)) - 1;
                 int year = Integer.parseInt(e.date_start.substring(0, 4));
@@ -120,7 +120,7 @@ public class EventDetailPanel extends JPanel {
                 dateStartField.getModel().setYear(year);
                 dateStartField.getModel().setSelected(true);
             }
-            if (!e.date_end.equals("")) {
+            if (e.date_end != null) {
                 int day = Integer.parseInt(e.date_end.substring(8, 10));
                 int month = Integer.parseInt(e.date_end.substring(5, 7)) - 1;
                 int year = Integer.parseInt(e.date_end.substring(0, 4));
