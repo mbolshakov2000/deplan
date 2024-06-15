@@ -24,7 +24,7 @@ import static java.lang.Integer.parseInt;
 class AlgorithmFrame extends JFrame {
     AlgorithmFrame() {
 
-        ArrayList<Teacher> teachers = new ArrayList<>();
+        ArrayList<Employee> employees = new ArrayList<>();
         String id="";
         String last_name="";
         String first_name="";
@@ -47,7 +47,7 @@ class AlgorithmFrame extends JFrame {
                     patronymic = "";
                 if (phone == null)
                     phone = "Не определен";
-                teachers.add(new Teacher(id, last_name, first_name, patronymic, position, phone));
+                employees.add(new Employee(id, last_name, first_name, patronymic, position, phone));
             }
         } catch (SQLException ex) {
             if (ex.getErrorCode()==12505){
@@ -93,7 +93,7 @@ class AlgorithmFrame extends JFrame {
         }
 
 
-        ArrayList<CompetenceTeacher> competencesTeachers = new ArrayList<>();
+        ArrayList<CompetenceEmployee> competencesEmployees = new ArrayList<>();
         String employee_id = "";
         id ="";
         String abbreviation = "";
@@ -121,7 +121,7 @@ class AlgorithmFrame extends JFrame {
                 score = rs.getString("score");
                 date = rs.getString("cl_date");
                 date = date.substring(0, date.indexOf(" 00:00:00"));
-                competencesTeachers.add(new CompetenceTeacher(employee_id,id,abbreviation, name, level_id, level, score, date));
+                competencesEmployees.add(new CompetenceEmployee(employee_id,id,abbreviation, name, level_id, level, score, date));
             }
         } catch (SQLException ex) {
             if (ex.getErrorCode() == 12505) {
@@ -310,9 +310,30 @@ class AlgorithmFrame extends JFrame {
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        panel.teachersLabel.setText("Сотрудников: " + teachers.size());
+        panel.employeesLabel.setText("Сотрудников: " + employees.size());
         panel.eventsLabel.setText("Мероприятий: " + events.size());
-        panel.competencesLabel.setText("Компетенций: "+ competencesTeachers.size());
+        panel.competencesLabel.setText("Компетенций: "+ competencesEmployees.size());
+
+        panel.progressBar.setVisible(true);
+        panel.progressBar.setIndeterminate(true);
+        PredictThread predictThread = new PredictThread();
+        Thread predThread = new Thread(predictThread);
+        predThread.start();
+        Timer vv = new Timer(10, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (predictThread.getResult()==1){
+                    panel.mlLabel.setVisible(false);
+                    panel.del4.setVisible(false);
+                    panel.progressBar.setVisible(false);
+                    panel.startAntAlg.setVisible(true);
+                    panel.startAnnealingAlg.setVisible(true);
+                    panel.startAllAlg.setVisible(true);
+                    panel.startSetAlg.setVisible(true);
+                    ((Timer) e.getSource()).stop();
+                }
+            }
+        });
+        vv.start();
 
         panel.startAnnealingAlg.addActionListener(new ActionListener() {
             @Override
@@ -325,7 +346,7 @@ class AlgorithmFrame extends JFrame {
                 panel.startAllAlg.setVisible(false);
                 panel.timeLabel.setVisible(false);
 
-                AnnealingAlgorithmThread annealingAlgorithmThread = new AnnealingAlgorithmThread(teachers, competencesTeachers, events, competencesEvents);
+                AnnealingAlgorithmThread annealingAlgorithmThread = new AnnealingAlgorithmThread(employees, competencesEmployees, events, competencesEvents);
                 Thread annealingThread = new Thread(annealingAlgorithmThread);
                 annealingThread.start();
                 Timer v = new Timer(10, new ActionListener() {
@@ -339,7 +360,7 @@ class AlgorithmFrame extends JFrame {
                             panel.timeLabel.setText("Время работы: " + annealingAlgorithmThread.getResult() + " ms");
                             panel.timeLabel.setVisible(true);
                             ((Timer) e.getSource()).stop();
-                            saveXLS(events, teachers, annealingAlgorithmThread.getBest());
+                            saveXLS(events, employees, annealingAlgorithmThread.getBest());
 
                             try {
                                 DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
@@ -389,7 +410,7 @@ class AlgorithmFrame extends JFrame {
                 panel.startAllAlg.setVisible(false);
                 panel.timeLabel.setVisible(false);
 
-                AntAlgorithmThread antAlgorithmThread = new AntAlgorithmThread(teachers,competencesTeachers,events, competencesEvents);
+                AntAlgorithmThread antAlgorithmThread = new AntAlgorithmThread(employees,competencesEmployees,events, competencesEvents);
                 Thread annealingThread = new Thread(antAlgorithmThread);
                 annealingThread.start();
                 Timer v = new Timer(10, new ActionListener() {
@@ -403,7 +424,7 @@ class AlgorithmFrame extends JFrame {
                             panel.timeLabel.setText("Время работы: " + antAlgorithmThread.getResult() + " ms");
                             panel.timeLabel.setVisible(true);
                             ((Timer) e.getSource()).stop();
-                            saveXLS(events, teachers, antAlgorithmThread.getBest());
+                            saveXLS(events, employees, antAlgorithmThread.getBest());
 
                             try {
                                 DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
@@ -453,8 +474,8 @@ class AlgorithmFrame extends JFrame {
                 panel.startAllAlg.setVisible(false);
                 panel.timeLabel.setVisible(false);
 
-                AnnealingAlgorithmThread annealingAlgorithmThread = new AnnealingAlgorithmThread(teachers, competencesTeachers, events, competencesEvents);
-                AntAlgorithmThread antAlgorithmThread = new AntAlgorithmThread(teachers,competencesTeachers,events, competencesEvents);
+                AnnealingAlgorithmThread annealingAlgorithmThread = new AnnealingAlgorithmThread(employees, competencesEmployees, events, competencesEvents);
+                AntAlgorithmThread antAlgorithmThread = new AntAlgorithmThread(employees,competencesEmployees,events, competencesEvents);
                 Thread annealingThread = new Thread(annealingAlgorithmThread);
                 annealingThread.start();
                 Thread antThread = new Thread(antAlgorithmThread);
@@ -474,8 +495,8 @@ class AlgorithmFrame extends JFrame {
                             panel.timeLabel.setVisible(true);
                             ((Timer) e.getSource()).stop();
                             if (annealingAlgorithmThread.getDistance() > antAlgorithmThread.getDistance())
-                                saveXLS(events, teachers, annealingAlgorithmThread.getBest());
-                            else saveXLS(events, teachers, antAlgorithmThread.getBest());
+                                saveXLS(events, employees, annealingAlgorithmThread.getBest());
+                            else saveXLS(events, employees, antAlgorithmThread.getBest());
 
 
                             try {
@@ -521,14 +542,14 @@ class AlgorithmFrame extends JFrame {
         panel.startSetAlg.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SetAlgorithmFrame saframe = new SetAlgorithmFrame(teachers, competencesTeachers, events, competencesEvents, 0);
+                SetAlgorithmFrame saframe = new SetAlgorithmFrame(employees, competencesEmployees, events, competencesEvents, 0);
                 saframe.setLocationRelativeTo(null);
                 saframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             }
         });
     }
 
-    public void saveXLS (ArrayList<Event> events, ArrayList<Teacher> teachers, Ant ant){
+    public void saveXLS (ArrayList<Event> events, ArrayList<Employee> employees, Ant ant){
         int i;
         int result;
         JFileChooser fileChooserXLS = new JFileChooser();
@@ -574,12 +595,12 @@ class AlgorithmFrame extends JFrame {
             for (int g = 0; g <= inOneColumn; g++) {
                 Cell[] cname = new Cell[24];
                 for (i = 0; i < 24; i++) {
-                    if (i % 2 == 0 && (g*12)+i/2 < teachers.size()) {
+                    if (i % 2 == 0 && (g*12)+i/2 < employees.size()) {
                         cname[i] = row[g].createCell(i);
-                        cname[i].setCellValue(teachers.get((g*12)+i/2).id + ". " +
-                                teachers.get((g*12)+i/2).last_name + " " +
-                                teachers.get((g*12)+i/2).first_name.charAt(0) + ". " +
-                                teachers.get((g*12)+i/2).patronymic.charAt(0) + ".");
+                        cname[i].setCellValue(employees.get((g*12)+i/2).id + ". " +
+                                employees.get((g*12)+i/2).last_name + " " +
+                                employees.get((g*12)+i/2).first_name.charAt(0) + ". " +
+                                employees.get((g*12)+i/2).patronymic.charAt(0) + ".");
                     }
                     else if (i % 2 == 1){
                         cname[i] = row[g].createCell(i);

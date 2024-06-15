@@ -135,7 +135,7 @@ class EventsFrame extends JFrame {
                 tdframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                 tdframe.addWindowListener(new java.awt.event.WindowAdapter() {
                     public void windowClosed(WindowEvent e) {
-                        if (Main.closingWindowTeacher == 0) {
+                        if (Main.closingWindowEmployee == 0) {
                             setVisible(false);
                             dispose();
                             EventsFrame tframe = new EventsFrame();

@@ -24,9 +24,11 @@ class PredictThread implements Runnable {
             Statement s = c.createStatement();
             ResultSet rs = s.executeQuery("select cl.competence_id, cl.level_id as \"result_id\", cl.event_id, " +
                     "max(cl2.level_id) keep (dense_rank first order by cl2.cl_date) as \"level_id\" from current_level cl join " +
-                    "current_level cl2 on cl.employee_id = cl2.employee_id and cl.competence_id = cl2.competence_id and " +
-                    "cl2.cl_date < cl.cl_date where (cl.is_deleted is null or cl.is_deleted = 0) and (cl2.is_deleted is null or cl2.is_deleted = 0) " +
-                    "group by cl.event_id, cl.competence_id, cl.level_id, cl.employee_id, cl.cl_date");
+                    "current_level cl2 on cl.employee_id = cl2.employee_id and cl.competence_id = cl2.competence_id and cl.level_id >= cl2.level_id and " +
+                    "cl2.cl_date < cl.cl_date and cl2.event_id = cl.event_id " +
+                    "where (cl.is_deleted is null or cl.is_deleted = 0) and (cl2.is_deleted is null or cl2.is_deleted = 0) " +
+                    "group by cl.event_id, cl.competence_id, cl.level_id, cl.employee_id, cl.cl_date " +
+                    "order by cl.event_id, cl.competence_id, cl.cl_date");
             while (rs.next()) {
                 competence_id = rs.getString("competence_id");
                 level_id = rs.getString("level_id");
@@ -43,11 +45,16 @@ class PredictThread implements Runnable {
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write("Competence,Event,Level,Dest,Dest1");
             bw.newLine();
+            int cur_oper = -1;
             for (int i = 0; i < currentLevels.size(); i++) {
-                bw.write(currentLevels.get(i).getCompetence_id() + "," + currentLevels.get(i).getEvent_id() + "," +
-                        currentLevels.get(i).getLevel_id() + "," + currentLevels.get(i).getResult_id() + "," +
-                        (Integer.parseInt(currentLevels.get(i).getResult_id()) > Integer.parseInt(currentLevels.get(i).getLevel_id()) ? 1 : 0));
-                bw.newLine();
+                //if (Integer.parseInt(currentLevels.get(i).getLevel_id()) < Integer.parseInt(currentLevels.get(i).getResult_id()) && cur_oper != 0 ||
+                        //Integer.parseInt(currentLevels.get(i).getLevel_id()) == Integer.parseInt(currentLevels.get(i).getResult_id()) && cur_oper != 1) {
+                    bw.write(currentLevels.get(i).getCompetence_id() + "," + currentLevels.get(i).getEvent_id() + "," +
+                            currentLevels.get(i).getLevel_id() + "," + currentLevels.get(i).getResult_id() + "," +
+                            (Integer.parseInt(currentLevels.get(i).getResult_id()) > Integer.parseInt(currentLevels.get(i).getLevel_id()) ? 1 : 0));
+                    bw.newLine();
+                    cur_oper = Integer.parseInt(currentLevels.get(i).getLevel_id()) < Integer.parseInt(currentLevels.get(i).getResult_id()) ? 0 : 1;
+               // }
             }
             bw.close();
             fw.close();
@@ -56,6 +63,7 @@ class PredictThread implements Runnable {
             e.printStackTrace();
         }
         String line = "python src/main/resources/predict_result.py";
+        //String line = "python predict_result.py";
         CommandLine cmdLine = CommandLine.parse(line);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);

@@ -20,8 +20,8 @@ import java.util.Random;
 class AntAlgorithmThread implements Runnable {
 
     int result = 0;
-    ArrayList<Teacher> teachers = new ArrayList<>();
-    ArrayList<CompetenceTeacher> competenceTeachers = new ArrayList<>();
+    ArrayList<Employee> employees = new ArrayList<>();
+    ArrayList<CompetenceEmployee> competenceEmployees = new ArrayList<>();
     ArrayList<Event> events = new ArrayList<>();
     ArrayList<CompetenceEvent> competenceEvents = new ArrayList<>();
     Ant[] ant;
@@ -31,9 +31,9 @@ class AntAlgorithmThread implements Runnable {
     double p = 0.2;
     double Part = 0.95;
 
-    AntAlgorithmThread(ArrayList<Teacher> teachers, ArrayList<CompetenceTeacher> competenceTeachers, ArrayList<Event> events, ArrayList<CompetenceEvent> competenceEvents){
-        this.teachers = teachers;
-        this.competenceTeachers = competenceTeachers;
+    AntAlgorithmThread(ArrayList<Employee> employees, ArrayList<CompetenceEmployee> competenceEmployees, ArrayList<Event> events, ArrayList<CompetenceEvent> competenceEvents){
+        this.employees = employees;
+        this.competenceEmployees = competenceEmployees;
         this.events = events;
         this.competenceEvents = competenceEvents;
     }
@@ -41,56 +41,57 @@ class AntAlgorithmThread implements Runnable {
     public void run(){
 
         if (numberAnt == 0)
-            numberAnt = teachers.size()*events.size();
+            numberAnt = employees.size()*events.size();
         long startTime = System.currentTimeMillis();
         ant = new Ant[numberAnt];
         int i = 0;
         int j;
         int numberCourse = events.size();
-        int numberTeacher = teachers.size();
+        int numberEmployee = employees.size();
 
         double bestSolution = 0;
         bestAnt = 0;
-        double[][] matrixF = new double[numberTeacher][numberCourse];
-        double[][] matrixP = new double[numberTeacher][numberCourse];
+        double[][] matrixF = new double[numberEmployee][numberCourse];
+        double[][] matrixP = new double[numberEmployee][numberCourse];
         // Матрица соответствия
-//        System.out.println("Матрица соответствия");
-        for (i = 0; i < numberTeacher; i++) {
+        //System.out.println("Матрица соответствия");
+        for (i = 0; i < numberEmployee; i++) {
             for (j = 0; j < numberCourse; j++) {
                 matrixF[i][j] = 0;
-                for (int k = 0; k < competenceTeachers.size(); k++) {
+                for (int k = 0; k < competenceEmployees.size(); k++) {
                     for (int m = 0; m < competenceEvents.size(); m++) {
-                        if (teachers.get(i).id.equals(competenceTeachers.get(k).employee_id) &&
+                        if (employees.get(i).id.equals(competenceEmployees.get(k).employee_id) &&
                                 events.get(j).id.equals(competenceEvents.get(m).event_id) &&
-                                competenceEvents.get(m).id.equals(competenceTeachers.get(k).id)){ // равны id
-                            if (Integer.parseInt(competenceEvents.get(m).level_id) >
-                                    Integer.parseInt(competenceTeachers.get(k).level_id)){
-                                matrixF[i][j] = 0;
-                                break;
-                            }
-                            else if (Integer.parseInt(competenceEvents.get(m).level_id) <=
-                                        Integer.parseInt(competenceTeachers.get(k).level_id) &&
+                                competenceEvents.get(m).id.equals(competenceEmployees.get(k).id)){ // равны id
+                            //if (Integer.parseInt(competenceEvents.get(m).level_id) >
+                            //        Integer.parseInt(competenceEmployees.get(k).level_id)){
+                            //    matrixF[i][j] = 0;
+                            //    break;
+                            //}
+                            //else
+                            if (Integer.parseInt(competenceEvents.get(m).level_id) <=
+                                        Integer.parseInt(competenceEmployees.get(k).level_id) &&
                                 Integer.parseInt(competenceEvents.get(m).result_id) >
-                                        Integer.parseInt(competenceTeachers.get(k).level_id)){ // развитие +lvls
+                                        Integer.parseInt(competenceEmployees.get(k).level_id)){ // развитие +lvls
                                 matrixF[i][j] += (Integer.parseInt(competenceEvents.get(m).result_id) -
-                                        Integer.parseInt(competenceTeachers.get(k).level_id));
+                                        Integer.parseInt(competenceEmployees.get(k).level_id));
                             }
                             else if (Integer.parseInt(competenceEvents.get(m).level_id) <=
-                                    Integer.parseInt(competenceTeachers.get(k).level_id) &&
+                                    Integer.parseInt(competenceEmployees.get(k).level_id) &&
                                     Integer.parseInt(competenceEvents.get(m).result_id) ==
-                                            Integer.parseInt(competenceTeachers.get(k).level_id)){ // поддержание +0.5
+                                            Integer.parseInt(competenceEmployees.get(k).level_id)){ // поддержание +0.5
                                     matrixF[i][j] += 0.5;
                             }
                         }
                     }
                 }
-//                System.out.print(matrixF[i][j] + " ");
+                //System.out.print(matrixF[i][j] + " ");
             }
-//            System.out.println();
+            //System.out.println();
         }
          //Матрица феромона
         Random random = new Random();
-        for (i = 0; i < numberTeacher; i++) {
+        for (i = 0; i < numberEmployee; i++) {
             for (j = 0; j < numberCourse; j++) {
                 matrixP[i][j] = 0.5;
             }
@@ -108,35 +109,35 @@ class AntAlgorithmThread implements Runnable {
             ant[j].add(j % numberCourse);
             ant[j].distance = ant[j].distance + matrixF[0][j % numberCourse];
             quantity[j % numberCourse]--;
-            for (int k = 1; k < numberTeacher; k++) {
+            for (int k = 1; k < numberEmployee; k++) {
                 double sum = 0;
-                int currentTeacher = k;
+                int currentEmployee = k;
                 double F;
                 // Сумма для преподавателей без курса
                 for (i = 0; i < numberCourse; i++) {
-                    F = matrixF[currentTeacher][i];
-                    sum += (Math.pow(F, q) * Math.pow(matrixP[currentTeacher][i], p));
+                    F = matrixF[currentEmployee][i];
+                    sum += (Math.pow(F, q) * Math.pow(matrixP[currentEmployee][i], p));
                 }
                 double P = 0;
                 double probility = random.nextDouble();
                 boolean fl = false;
                 // Подбор курсу преподавателя
                 for (i = 0; i < numberCourse; i++) {
-                    F = matrixF[currentTeacher][i];
-                    P += (Math.pow(F, q) * Math.pow(matrixP[currentTeacher][i], p)) / sum;
+                    F = matrixF[currentEmployee][i];
+                    P += (Math.pow(F, q) * Math.pow(matrixP[currentEmployee][i], p)) / sum;
                     // Условие оптимальности пути
                     if (probility < P && quantity[i]>0) {
-                        ant[j].distance = ant[j].distance + matrixF[currentTeacher][i];
+                        ant[j].distance = ant[j].distance + matrixF[currentEmployee][i];
                         ant[j].add(i);
                         quantity[i]--;
                         fl = true;
-                        matrixP[currentTeacher][i] = matrixP[currentTeacher][i] + 1 / matrixF[currentTeacher][i];
+                        matrixP[currentEmployee][i] = matrixP[currentEmployee][i] + 1 / matrixF[currentEmployee][i];
                         break;
                     }
                 }
                 if (!fl) k--;
                 // Испарение феромона
-                matrixP = evaporation(numberCourse, numberTeacher, Part, matrixP);
+                matrixP = evaporation(numberCourse, numberEmployee, Part, matrixP);
             }
             // Проверяем путь муравья на лучшее решение
             if (bestSolution < ant[j].distance) {
@@ -160,9 +161,9 @@ class AntAlgorithmThread implements Runnable {
         result = 1;
     }
 
-    public double[][] evaporation ( int numberCourse, int numberTeacher, double Part, double[][] matrixF){
+    public double[][] evaporation ( int numberCourse, int numberEmployee, double Part, double[][] matrixF){
         int i;
-        for (i = 0; i < numberTeacher; i++) {
+        for (i = 0; i < numberEmployee; i++) {
             for (int m = 0; m < numberCourse; m++) {
                 matrixF[i][m] = matrixF[i][m] * Part;
                 if (matrixF[i][m] < 0.5) matrixF[i][m] = 0.5;

@@ -22,7 +22,7 @@ public class Main {
     static String URL = "jdbc:oracle:thin:@localhost:1521:xe";
     static String USER = "personnel_department";
     static String PASSWORD = "123";
-    static int closingWindowTeacher = 0;
+    static int closingWindowEmployee = 0;
     static int closingWindowEvent = 0;
     static int curTeach = -1;
     static int curEvent = -1;
@@ -139,14 +139,14 @@ public class Main {
         JMenu openMenu = new JMenu("Посмотреть");
         openMenu.setFont(font);
 
-        JMenuItem openTeachers = new JMenuItem("Преподаватели");
-        openTeachers.setFont(font);
-        openMenu.add(openTeachers);
+        JMenuItem openEmployees = new JMenuItem("Сотрудники");
+        openEmployees.setFont(font);
+        openMenu.add(openEmployees);
 
-        openTeachers.addActionListener(new ActionListener() {
+        openEmployees.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Main.curTeach = -1;
-                TeachersFrame tframe = new TeachersFrame();
+                EmployeesFrame tframe = new EmployeesFrame();
                 tframe.setLocationRelativeTo(null);
                 tframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             }
@@ -199,7 +199,7 @@ public class Main {
         menuBar.add(openMenu);
         menuBar.add(analysisMenu);
 
-        MyFrame frame = new MyFrame();
+        MainFrame frame = new MainFrame();
         frame.setJMenuBar(menuBar);
         frame.setLocationRelativeTo(null);
 
@@ -239,7 +239,7 @@ public class Main {
                     date[22].setCellValue("Декабрь");
 
                     ArrayList<Schedule> schedule = new ArrayList<>();
-                    String id_teacher="";
+                    String id_employee="";
                     String last_name="";
                     String first_name="";
                     String patronymic="";
@@ -255,14 +255,14 @@ public class Main {
                                 "JOIN event ev on ev.event_id = s.event_id where s.schedule_id = (select max(schedule_id) from schedule) " +
                                 "order by em.employee_id ");
                         while (rs.next()) {
-                            id_teacher = rs.getString("employee_id");
+                            id_employee = rs.getString("employee_id");
                             last_name = rs.getString("last_name");
                             first_name = rs.getString("first_name");
                             patronymic = rs.getString("patronymic");
                             id_event = rs.getString("event_id");
                             name_event = rs.getString("name");
-                            String fio_teacher = last_name+" "+first_name.charAt(0)+". "+patronymic.charAt(0)+".";
-                            schedule.add(new Schedule(id_teacher,fio_teacher, id_event, name_event));
+                            String fio_employee = last_name+" "+first_name.charAt(0)+". "+patronymic.charAt(0)+".";
+                            schedule.add(new Schedule(id_employee,fio_employee, id_event, name_event));
                         }
                     } catch (SQLException ex) {
                         if (ex.getErrorCode() == 12505) {
@@ -299,8 +299,8 @@ public class Main {
                         for (i = 0; i < 24; i++) {
                             if (i % 2 == 0 && (g*12)+i/2 < schedule.size()) {
                                 cname[i] = row[g].createCell(i);
-                                cname[i].setCellValue(schedule.get((g*12)+i/2).id_teacher + ". " +
-                                        schedule.get((g*12)+i/2).name_teacher);
+                                cname[i].setCellValue(schedule.get((g*12)+i/2).id_employee + ". " +
+                                        schedule.get((g*12)+i/2).name_employee);
                             }
                             else if (i % 2 == 1){
                                 cname[i] = row[g].createCell(i);

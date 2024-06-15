@@ -18,15 +18,15 @@ import static java.lang.Integer.parseInt;
 
 class SetAlgorithmFrame extends JFrame {
 
-    ArrayList<Teacher> teachers;
-    ArrayList<CompetenceTeacher> competencesTeachers;
+    ArrayList<Employee> employees;
+    ArrayList<CompetenceEmployee> competencesEmployees;
     ArrayList<Event> events;
     ArrayList<CompetenceEvent> competencesEvents;
 
-    SetAlgorithmFrame(ArrayList<Teacher> teachers, ArrayList<CompetenceTeacher> competencesTeachers,
+    SetAlgorithmFrame(ArrayList<Employee> employees, ArrayList<CompetenceEmployee> competencesEmployees,
                       ArrayList<Event> events, ArrayList<CompetenceEvent> competencesEvents, int alg) {
-        this.teachers = teachers;
-        this.competencesTeachers = competencesTeachers;
+        this.employees = employees;
+        this.competencesEmployees = competencesEmployees;
         this.events = events;
         this.competencesEvents = competencesEvents;
 
@@ -51,7 +51,7 @@ class SetAlgorithmFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 dispose();
-                SetAlgorithmFrame tframe = new SetAlgorithmFrame(teachers, competencesTeachers, events, competencesEvents, panel.chooseAlg.getSelectedIndex());
+                SetAlgorithmFrame tframe = new SetAlgorithmFrame(employees, competencesEmployees, events, competencesEvents, panel.chooseAlg.getSelectedIndex());
                 tframe.setLocationRelativeTo(null);
                 tframe.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             }
@@ -61,7 +61,7 @@ class SetAlgorithmFrame extends JFrame {
             panel.startAnnealingAlg.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    AnnealingAlgorithmThread annealingAlgorithmThread = new AnnealingAlgorithmThread(teachers, competencesTeachers, events, competencesEvents);
+                    AnnealingAlgorithmThread annealingAlgorithmThread = new AnnealingAlgorithmThread(employees, competencesEmployees, events, competencesEvents);
                     try {
                         annealingAlgorithmThread.tmin = Integer.parseInt(panel.tminField.getText());
                     }
@@ -102,7 +102,7 @@ class SetAlgorithmFrame extends JFrame {
                                 panel.timeLabel.setText("Время работы: " + annealingAlgorithmThread.getResult() + " ms");
                                 panel.timeLabel.setVisible(true);
                                 ((Timer) e.getSource()).stop();
-                                saveXLS(events, teachers, annealingAlgorithmThread.getBest());
+                                saveXLS(events, employees, annealingAlgorithmThread.getBest());
 
                                 try {
                                     DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
@@ -147,8 +147,7 @@ class SetAlgorithmFrame extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
 
-
-                    AntAlgorithmThread antAlgorithmThread = new AntAlgorithmThread(teachers, competencesTeachers, events, competencesEvents);
+                    AntAlgorithmThread antAlgorithmThread = new AntAlgorithmThread(employees, competencesEmployees, events, competencesEvents);
                     try {
                         antAlgorithmThread.numberAnt = Integer.parseInt(panel.countAntField.getText());
                     }
@@ -197,7 +196,7 @@ class SetAlgorithmFrame extends JFrame {
                                 panel.timeLabel.setText("Время работы: " + antAlgorithmThread.getResult() + " ms");
                                 panel.timeLabel.setVisible(true);
                                 ((Timer) e.getSource()).stop();
-                                saveXLS(events, teachers, antAlgorithmThread.getBest());
+                                saveXLS(events, employees, antAlgorithmThread.getBest());
 
                                 try {
                                     DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
@@ -241,8 +240,8 @@ class SetAlgorithmFrame extends JFrame {
             panel.startAllAlg.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    AnnealingAlgorithmThread annealingAlgorithmThread = new AnnealingAlgorithmThread(teachers, competencesTeachers, events, competencesEvents);
-                    AntAlgorithmThread antAlgorithmThread = new AntAlgorithmThread(teachers, competencesTeachers, events, competencesEvents);
+                    AnnealingAlgorithmThread annealingAlgorithmThread = new AnnealingAlgorithmThread(employees, competencesEmployees, events, competencesEvents);
+                    AntAlgorithmThread antAlgorithmThread = new AntAlgorithmThread(employees, competencesEmployees, events, competencesEvents);
 
                     try {
                         antAlgorithmThread.numberAnt = Integer.parseInt(panel.countAntField.getText());
@@ -322,8 +321,8 @@ class SetAlgorithmFrame extends JFrame {
                                 panel.timeLabel.setVisible(true);
                                 ((Timer) e.getSource()).stop();
                                 if (annealingAlgorithmThread.getDistance() > antAlgorithmThread.getDistance())
-                                    saveXLS(events, teachers, annealingAlgorithmThread.getBest());
-                                else saveXLS(events, teachers, antAlgorithmThread.getBest());
+                                    saveXLS(events, employees, annealingAlgorithmThread.getBest());
+                                else saveXLS(events, employees, antAlgorithmThread.getBest());
 
 
                                 try {
@@ -368,7 +367,7 @@ class SetAlgorithmFrame extends JFrame {
         }
     }
 
-    public void saveXLS (ArrayList<Event> events, ArrayList<Teacher> teachers, Ant ant){
+    public void saveXLS (ArrayList<Event> events, ArrayList<Employee> employees, Ant ant){
         int i;
         int result;
         JFileChooser fileChooserXLS = new JFileChooser();
@@ -414,12 +413,12 @@ class SetAlgorithmFrame extends JFrame {
             for (int g = 0; g <= inOneColumn; g++) {
                 Cell[] cname = new Cell[24];
                 for (i = 0; i < 24; i++) {
-                    if (i % 2 == 0 && (g*12)+i/2 < teachers.size()) {
+                    if (i % 2 == 0 && (g*12)+i/2 < employees.size()) {
                         cname[i] = row[g].createCell(i);
-                        cname[i].setCellValue(teachers.get((g*12)+i/2).id + ". " +
-                                teachers.get((g*12)+i/2).last_name + " " +
-                                teachers.get((g*12)+i/2).first_name.charAt(0) + ". " +
-                                teachers.get((g*12)+i/2).patronymic.charAt(0) + ".");
+                        cname[i].setCellValue(employees.get((g*12)+i/2).id + ". " +
+                                employees.get((g*12)+i/2).last_name + " " +
+                                employees.get((g*12)+i/2).first_name.charAt(0) + ". " +
+                                employees.get((g*12)+i/2).patronymic.charAt(0) + ".");
                     }
                     else if (i % 2 == 1){
                         cname[i] = row[g].createCell(i);

@@ -13,8 +13,8 @@ import java.util.Random;
 class AnnealingAlgorithmThread implements Runnable {
 
     int result = 0;
-    ArrayList<Teacher> teachers = new ArrayList<>();
-    ArrayList<CompetenceTeacher> competenceTeachers = new ArrayList<>();
+    ArrayList<Employee> employees = new ArrayList<>();
+    ArrayList<CompetenceEmployee> competenceEmployees = new ArrayList<>();
     ArrayList<Event> events = new ArrayList<>();
     ArrayList<CompetenceEvent> competenceEvents = new ArrayList<>();
     Ant best;
@@ -22,9 +22,9 @@ class AnnealingAlgorithmThread implements Runnable {
     double tmax = 100000;
     double coolingRate = 0.0003; // охлаждение
 
-    AnnealingAlgorithmThread(ArrayList<Teacher> teachers, ArrayList<CompetenceTeacher> competenceTeachers, ArrayList<Event> events, ArrayList<CompetenceEvent> competenceEvents){
-        this.teachers = teachers;
-        this.competenceTeachers = competenceTeachers;
+    AnnealingAlgorithmThread(ArrayList<Employee> employees, ArrayList<CompetenceEmployee> competenceEmployees, ArrayList<Event> events, ArrayList<CompetenceEvent> competenceEvents){
+        this.employees = employees;
+        this.competenceEmployees = competenceEmployees;
         this.events = events;
         this.competenceEvents = competenceEvents;
     }
@@ -33,35 +33,35 @@ class AnnealingAlgorithmThread implements Runnable {
 
         long startTime = System.currentTimeMillis();
         int numberCourse = events.size();
-        int numberTeacher = teachers.size();
+        int numberEmployee = employees.size();
 
-        double[][] matrixF = new double[numberTeacher][numberCourse];
+        double[][] matrixF = new double[numberEmployee][numberCourse];
         // Матрица соответствия
 //        System.out.println("Матрица соответствия");
-        for (int i = 0; i < numberTeacher; i++) {
+        for (int i = 0; i < numberEmployee; i++) {
             for (int j = 0; j < numberCourse; j++) {
                 matrixF[i][j] = 0;
-                for (int k = 0; k < competenceTeachers.size(); k++) {
+                for (int k = 0; k < competenceEmployees.size(); k++) {
                     for (int m = 0; m < competenceEvents.size(); m++) {
-                        if (teachers.get(i).id.equals(competenceTeachers.get(k).employee_id) &&
+                        if (employees.get(i).id.equals(competenceEmployees.get(k).employee_id) &&
                                 events.get(j).id.equals(competenceEvents.get(m).event_id) &&
-                                competenceEvents.get(m).id.equals(competenceTeachers.get(k).id)){ // равны id
+                                competenceEvents.get(m).id.equals(competenceEmployees.get(k).id)){ // равны id
                             if (Integer.parseInt(competenceEvents.get(m).level_id) >
-                                    Integer.parseInt(competenceTeachers.get(k).level_id)){
+                                    Integer.parseInt(competenceEmployees.get(k).level_id)){
                                 matrixF[i][j] = 0;
                                 break;
                             }
                             else if (Integer.parseInt(competenceEvents.get(m).level_id) <=
-                                    Integer.parseInt(competenceTeachers.get(k).level_id) &&
+                                    Integer.parseInt(competenceEmployees.get(k).level_id) &&
                                     Integer.parseInt(competenceEvents.get(m).result_id) >
-                                            Integer.parseInt(competenceTeachers.get(k).level_id)){ // развитие +lvls
+                                            Integer.parseInt(competenceEmployees.get(k).level_id)){ // развитие +lvls
                                 matrixF[i][j] += (Integer.parseInt(competenceEvents.get(m).result_id) -
-                                        Integer.parseInt(competenceTeachers.get(k).level_id));
+                                        Integer.parseInt(competenceEmployees.get(k).level_id));
                             }
                             else if (Integer.parseInt(competenceEvents.get(m).level_id) <=
-                                    Integer.parseInt(competenceTeachers.get(k).level_id) &&
+                                    Integer.parseInt(competenceEmployees.get(k).level_id) &&
                                     Integer.parseInt(competenceEvents.get(m).result_id) ==
-                                            Integer.parseInt(competenceTeachers.get(k).level_id)){ // поддержание +0.5
+                                            Integer.parseInt(competenceEmployees.get(k).level_id)){ // поддержание +0.5
                                 matrixF[i][j] += 0.5;
                             }
                         }
@@ -77,7 +77,7 @@ class AnnealingAlgorithmThread implements Runnable {
 
         // Начальное случайное значение
         Ant currentSolution = new Ant();
-        for (int i = 0; i < numberTeacher; i++){
+        for (int i = 0; i < numberEmployee; i++){
             currentSolution.add((int) (Math.random()*numberCourse));
         }
 
@@ -85,14 +85,14 @@ class AnnealingAlgorithmThread implements Runnable {
 
         // Лучшее решение
         best = new Ant();
-        for (int i =0; i<numberTeacher; i++){
+        for (int i =0; i<numberEmployee; i++){
             best.add(currentSolution.get(i));
         }
 
         // Пока позволяет температура выполняем действия
         while (temp > tmin) {
             Ant newSolution = new Ant();
-            for (int i =0; i<numberTeacher; i++){
+            for (int i =0; i<numberEmployee; i++){
                 newSolution.add(currentSolution.get(i));
             }
 
@@ -108,14 +108,14 @@ class AnnealingAlgorithmThread implements Runnable {
             newSolution.set(tourPos1, citySwap2);
 
             double currentEnergy = 0;
-            for (int i = 0; i < numberTeacher; i++){
+            for (int i = 0; i < numberEmployee; i++){
                 int curPoint = currentSolution.get(i);
                 currentEnergy += matrixF[i][curPoint];
             }
             currentSolution.distance = currentEnergy;
 
             double neighbourEnergy = 0;
-            for (int i = 0; i < numberTeacher; i++){
+            for (int i = 0; i < numberEmployee; i++){
                 int curPoint = newSolution.get(i);
                 neighbourEnergy += matrixF[i][curPoint];
             }
@@ -124,14 +124,14 @@ class AnnealingAlgorithmThread implements Runnable {
             // Переход
             if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
                 currentSolution = new Ant();
-                for (int i =0; i<numberTeacher; i++){
+                for (int i =0; i<numberEmployee; i++){
                     currentSolution.add(newSolution.get(i));
                 }
                 currentSolution.distance = newSolution.distance;
             }
 
             double bestEnergy = 0;
-            for (int i = 0; i < numberTeacher; i++){
+            for (int i = 0; i < numberEmployee; i++){
                 int curPoint = best.get(i);
                 bestEnergy += matrixF[i][curPoint];
             }
@@ -140,7 +140,7 @@ class AnnealingAlgorithmThread implements Runnable {
             // Лучшее решение сохраняем
             if (currentSolution.distance > best.distance) {
                 best = new Ant();
-                for (int i =0; i<numberTeacher; i++){
+                for (int i =0; i<numberEmployee; i++){
                     best.add(currentSolution.get(i));
                 }
                 best.distance = currentSolution.distance;
